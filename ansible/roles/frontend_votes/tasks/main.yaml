@@ -1,0 +1,20 @@
+- name: Kill process using port 5001 (if it exists)
+  ansible.builtin.shell: |
+    pid=$(lsof -ti:5001)
+    if [ -n "$pid" ]; then
+      kill -9 $pid
+    fi
+  ignore_errors: true
+
+- name: Start Vote App Container
+  community.docker.docker_container:
+    name: vote_app
+    image: mirmika/vote:latest  # Replace with your actual image
+    state: started
+    restart_policy: always
+    ports:
+      - "80:80"
+    env:
+      REDIS_PORT: "6379"
+      REDIS_HOST: "10.0.42.133"  # Ensure the vote app connects to Redis
+

@@ -1,0 +1,24 @@
+---
+- name: Ensure the /home/ubuntu/vote directory exists
+  file:
+   path: /home/ubuntu/db-data
+   state: directory
+   owner: ubuntu
+   group: ubuntu
+   mode: '0755'
+- name: Start PostgreSQL Container
+  docker_container:
+    name: db
+    image: postgres:15-alpine
+    state: started
+    restart_policy: always
+    volumes:
+      - "db-data:/var/lib/postgresql/data"
+    ports:
+      - "5432:5432"
+
+- name: Ensure db-data volume exists
+  docker_volume:
+    name: db-data
+    state: present
+ 

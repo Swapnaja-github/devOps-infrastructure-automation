@@ -1,0 +1,25 @@
+---
+- name: Deploy Voting App
+  hosts: all
+  become: true
+  roles:
+    - role: docker
+
+    - role: redis
+      when: "'redis' in group_names"
+
+    - role: database
+      when: "'database' in group_names"
+      
+    - role: bastion
+      when: "'bastion' in group_names"
+
+    - role: frontend_votes
+      when: "'frontend_vote' in group_names"
+
+    - role: frontend_results
+      when: "'frontend_result' in group_names"
+
+    - role: backend
+      when: "'backend' in group_names"
+

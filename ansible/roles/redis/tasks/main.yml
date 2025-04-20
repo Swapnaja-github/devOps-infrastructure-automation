@@ -1,0 +1,9 @@
+---
+- name: Start Redis Container
+  community.docker.docker_container:
+    name: redis
+    image: redis:7-alpine
+    state: started
+    restart_policy: always
+    ports:
+      - "6379:6379"

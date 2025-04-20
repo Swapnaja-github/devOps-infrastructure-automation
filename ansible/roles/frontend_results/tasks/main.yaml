@@ -1,0 +1,40 @@
+---
+- name: Kill process using port 81 (if it exists)
+  ansible.builtin.shell: |
+    pid=$(lsof -ti:81)
+    if [ -n "$pid" ]; then
+      kill -9 $pid
+    fi
+
+- name: Pull the Docker image
+  community.docker.docker_image:
+    name: sjagtap0/result:latest
+    source: pull
+
+- name: Create and start the Docker container
+  docker_container:
+    name: result_app_container
+    image: sjagtap0/result:latest
+    state: started
+    restart_policy: always
+    ports:
+      - "81:80"
+    env:
+      PORT: "80"
+      PG_HOST: "10.0.42.209"
+      PG_PORT: "5432"
+      PG_USER: "postgres"
+      PG_PASSWORD: "postgres" 
+      PG_DATABASE: "votes"      
+
+- name: Wait for the application to start
+  ansible.builtin.wait_for:
+    host: "10.0.42.254"
+    port: 81
+    delay: 10
+    timeout: 60
+
+- name: Display success message
+  debug:
+    msg: "The Result App is now running on http://localhost:81"
+

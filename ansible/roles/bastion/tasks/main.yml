@@ -1,0 +1,33 @@
+---
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - ansible
+      - python3-pip
+      - unzip
+      - git
+    state: present
+
+- name: Ensure SSH key exists
+  ansible.builtin.copy:
+    src: ~/vpc-connection-key.pem
+    dest: /home/ubuntu/vpc-connection-key.pem
+    mode: '0600'
+    owner: ubuntu
+    group: ubuntu
+
+- name: Allow SSH Agent Forwarding
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/ssh_config
+    line: "ForwardAgent yes"
+    state: present
+
+- name: Add private IPs of instances to known hosts
+  ansible.builtin.shell: ssh-keyscan {{ item }} >> /home/ubuntu/.ssh/known_hosts
+  loop:
+    - "10.0.42.108"  # frontend-vote-instance
+    - "10.0.42.254"   # frontend-result-instance
+    - "10.0.42.184"  # backend-instance
+    - "10.0.42.133"  # redis-instance
+    - "10.0.42.209"   # database-instance
+  ignore_errors: yes
